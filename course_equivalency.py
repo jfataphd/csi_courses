@@ -85,23 +85,37 @@ if reset_button:
 st.session_state.input_title = user_input_title
 st.session_state.input_description = user_input_description
 
+# ... [rest of the code remains unchanged]
+
 if search_button and user_input_title and user_input_description:
     closest_titles, closest_descriptions = find_closest_courses_with_scores_updated(user_input_title, user_input_description, df_updated)
 
-    # Display title matches in table format
+    # Helper function to apply styling based on similarity
+    def style_text(similarity, text):
+        if similarity == "Similar":
+            return f"<span style='color: green'>{text}</span>"
+        elif similarity == "Very Similar":
+            return f"<span style='color: green; font-weight: bold'>{text}</span>"
+        else:
+            return text
+
+    # Construct table for title matches
     st.write("Closest course matches for title are:")
-    title_data = [{"Title": df_updated['title'].iloc[title[0]],
-                   "Code": df_updated['CODE'].iloc[title[0]],
-                   "Score": f"{title[1]:.4f}",
-                   "Similarity": title[2]} for title in closest_titles]
-    st.table(pd.DataFrame(title_data))
+    title_table = "| Title | Code | Score | Similarity | URL |\n| --- | --- | --- | --- | --- |\n"
+    for title in closest_titles:
+        styled_title = style_text(title[2], df_updated['title'].iloc[title[0]])
+        title_table += f"| {styled_title} | {df_updated['CODE'].iloc[title[0]]} | {title[1]:.4f} | {title[2]} | [Catalog]({df_updated['url'].iloc[title[0]]}) |\n"
+    st.markdown(title_table, unsafe_allow_html=True)
 
     st.write("")  # Add a space
 
-    # Display description matches in table format
+    # Construct table for description matches
     st.write("Closest course matches for description are:")
-    description_data = [{"Title": df_updated['title'].iloc[description[0]],
-                         "Code": df_updated['CODE'].iloc[description[0]],
-                         "Score": f"{description[1]:.4f}",
-                         "Similarity": description[2]} for description in closest_descriptions]
-    st.table(pd.DataFrame(description_data))
+    description_table = "| Title | Code | Score | Similarity | URL |\n| --- | --- | --- | --- | --- |\n"
+    for description in closest_descriptions:
+        styled_description = style_text(description[2], df_updated['title'].iloc[description[0]])
+        description_table += f"| {styled_description} | {df_updated['CODE'].iloc[description[0]]} | {description[1]:.4f} | {description[2]} | [Catalog]({df_updated['url'].iloc[description[0]]}) |\n"
+    st.markdown(description_table, unsafe_allow_html=True)
+
+
+
