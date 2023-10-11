@@ -57,7 +57,7 @@ def find_closest_courses_with_scores_updated(title, description, df):
 df_updated = pd.read_csv('csi_courses_f23.csv')
 
 # Streamlit UI
-st.title('Course Matcher')
+st.title('CSI Course Matcher')
 
 # Initialize or get the state of our input fields
 user_input_title = st.session_state.get('input_title', '')
@@ -101,21 +101,20 @@ if search_button and user_input_title and user_input_description:
 
     # Construct table for title matches
     st.write("Closest course matches for title are:")
-    title_table = "| Title | Code | Score | Similarity | URL |\n| --- | --- | --- | --- | --- |\n"
+    title_table = "| Title | Code | Score | Similarity | CSI Course Catalog | T-REX |\n| --- | --- | --- | --- | --- | --- |\n"
     for title in closest_titles:
         styled_title = style_text(title[2], df_updated['title'].iloc[title[0]])
-        title_table += f"| {styled_title} | {df_updated['CODE'].iloc[title[0]]} | {title[1]:.4f} | {title[2]} | [Catalog]({df_updated['url'].iloc[title[0]]}) |\n"
+        title_table += f"| {styled_title} | {df_updated['CODE'].iloc[title[0]]} | {title[1]:.4f} | {title[2]} | [Catalog]({df_updated['url'].iloc[title[0]]}) | {df_updated['t_rex'].iloc[title[0]]} |\n"
     st.markdown(title_table, unsafe_allow_html=True)
 
     st.write("")  # Add a space
 
     # Construct table for description matches
     st.write("Closest course matches for description are:")
-    description_table = "| Title | Code | Score | Similarity | URL |\n| --- | --- | --- | --- | --- |\n"
+    description_table = "| Title | Code | Score | Similarity | URL | T-REX |\n| --- | --- | --- | --- | --- | --- |\n"
     for description in closest_descriptions:
         styled_description = style_text(description[2], df_updated['title'].iloc[description[0]])
-        description_table += f"| {styled_description} | {df_updated['CODE'].iloc[description[0]]} | {description[1]:.4f} | {description[2]} | [Catalog]({df_updated['url'].iloc[description[0]]}) |\n"
+        description_table += f"| {styled_description} | {df_updated['CODE'].iloc[description[0]]} | {description[1]:.4f} | {description[2]} | [Catalog]({df_updated['url'].iloc[description[0]]}) | {df_updated['t_rex'].iloc[description[0]]} |\n"
     st.markdown(description_table, unsafe_allow_html=True)
-
 
 
