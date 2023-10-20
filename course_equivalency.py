@@ -2,6 +2,7 @@ from sklearn.metrics.pairwise import linear_kernel
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 import streamlit as st
+import string
 
 def categorize_similarity(score):
     """Categorize the cosine similarity score."""
@@ -53,8 +54,24 @@ def find_closest_courses_with_scores_updated(title, description, df):
     return closest_titles, closest_descriptions
 
 
-# Load the CSV outside the function
-df_updated = pd.read_csv('csi_courses_f23.csv')
+# Load the CSV
+df_updated = pd.read_csv('csi_courses_f23_exchange.csv', encoding='utf-8')
+
+# Handle NaN values
+df_updated['description'].fillna("", inplace=True)
+
+# Remove punctuation and convert to lowercase
+def clean_text(text):
+    return text.translate(str.maketrans('', '', string.punctuation)).lower()
+
+df_updated['description'] = df_updated['description'].apply(clean_text)
+
+# Ensure descriptions are strings (though they should already be at this point)
+df_updated['description'] = df_updated['description'].astype(str)
+
+
+
+
 
 # Streamlit UI
 st.title('CSI Course Matcher')
