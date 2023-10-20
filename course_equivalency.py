@@ -33,7 +33,7 @@ def find_closest_courses_with_scores_updated(title, description, df):
     if 'description' not in df_updated.columns:
         raise ValueError("'description' column not found in the CSV.")
 
-    tfidf_vectorizer_description = TfidfVectorizer(stop_words='english', max_features=5000)
+    tfidf_vectorizer_description = TfidfVectorizer(stop_words='english', max_features=4000)
     tfidf_matrix_description = tfidf_vectorizer_description.fit_transform(df_updated['description'])
     description_vectorized = tfidf_vectorizer_description.transform([description])
     cosine_similarities_description = linear_kernel(description_vectorized, tfidf_matrix_description).flatten()
