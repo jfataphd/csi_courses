@@ -55,7 +55,7 @@ def find_closest_courses_with_scores_updated(title, description, df):
 
 
 # Load the CSV
-df_updated = pd.read_csv('csi_courses_f23_exchange.csv', encoding='utf-8')
+df_updated = pd.read_csv('csi_courses_f23.csv', encoding='utf-8')
 
 # Handle NaN values
 df_updated['description'].fillna("", inplace=True)
