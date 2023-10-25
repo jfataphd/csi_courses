@@ -118,37 +118,23 @@ def format_course_code(input_code):
     return formatted_code
 
 #
-
 # Streamlit UI
 st.title('CSI Course Selector and Matcher')
 
 st.sidebar.markdown("## Step 1: Please Select College(s) for Similarity Screening")
-
 
 # Dictionary mapping codes to college names
 college_names = {
     "CSI01": "College of Staten Island"
 }
 
-# List all files in the 'cuny colleges' directory
-all_files = os.listdir('cuny colleges')
-
-# Convert file names to college names using the dictionary
-display_names = [college_names[file.split('.')[0]] if file.split('.')[0] in college_names else file for file in all_files]
-
 selected_colleges = []
-
-# Reduce loop overheads for creating checkboxes
-display_name_set = set(display_names)  # Convert to set for O(1) lookup
 
 # Use a loop to create a checkbox for each college and capture which are selected
 for college_code, college_name in college_names.items():
-    if college_name in display_name_set:
-        default_value = True if college_name == "College of Staten Island" else False
-        if st.sidebar.checkbox(college_name, value=default_value):
-            selected_colleges.append(college_name)
-
-
+    default_value = True if college_name == "College of Staten Island" else False
+    if st.sidebar.checkbox(college_name, value=default_value):
+        selected_colleges.append(college_name)
 
 # ... [the same as before, no changes]
 
