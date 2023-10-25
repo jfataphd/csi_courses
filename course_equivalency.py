@@ -273,7 +273,7 @@ for selected_college in selected_colleges:
     selected_file = [key for key, value in college_names.items() if value == selected_college][0] + ".csv"
 
     # Load the selected CSV from the 'cuny colleges' directory
-    df_updated = pd.read_csv('suny_courses.csv')
+    df_updated = pd.read_csv('csi_courses_f23.csv')
 
 
     df_updated['description'].fillna("", inplace=True)
