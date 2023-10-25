@@ -140,7 +140,39 @@ for college_code, college_name in college_names.items():
 
 # Fetching course data from csi_coursesf23.csv
 course_data = fetch_course_data_from_cuny01()
-input_choice = st.radio("Step 2: Select input method:", ["SUNY Course Title", "SUNY Course Code", "Any Course Title/Description"])
+
+# Default initialization for description_label
+description_label = 'Course Description:'
+
+# Define the Reset button immediately
+reset_button = st.button('Reset')
+
+
+# If the Reset button is pressed, initialize values to empty or defaults.
+if reset_button:
+    # Input fields
+    user_input_title = ''
+    user_input_description = ''
+    user_input_code = ''
+
+    # Checkboxes and select boxes
+    selected_colleges = []
+    for college_code, college_name in college_names.items():
+        default_value = True if college_name == "College of Staten Island" else False
+        if st.sidebar.checkbox(college_name, value=default_value, key=college_code):
+            selected_colleges.append(college_name)
+
+    # Session state
+    if 'input_title' in st.session_state:
+        del st.session_state['input_title']
+    if 'input_description' in st.session_state:
+        del st.session_state['input_description']
+
+    # Rerun the app to refresh the page immediately.
+    st.experimental_rerun()
+
+input_choice = st.radio("Step 2: Select input method:",
+                            ["SUNY Course Title", "SUNY Course Code", "Any Course Title/Description"])
 
 # Default initialization
 user_input_title = ""
@@ -149,7 +181,8 @@ options_list = []
 user_input_code = ""
 
 if input_choice == "SUNY Course Title":
-    user_input_title = st.text_input('Step 3: Type part or all of the course title and then hit ENTER to see possible CSI matches:', '')
+    user_input_title = st.text_input(
+        'Step 3: Type part or all of the course title and then hit ENTER to see possible CSI matches:', '')
     search_key = user_input_title
     search_field = 'title'
 elif input_choice == "SUNY Course Code":
@@ -237,8 +270,8 @@ elif search_field != 'none':
                     user_input_description = course['description']
                     break
 
-# Display the course description text area
-description_label = 'Course Description:'
+# # Display the course description text area
+# description_label = 'Course Description:'
 if input_choice == "Any Course Title/Description":
     description_label = 'Step 3b: Enter the any course description:'
 
@@ -253,20 +286,35 @@ user_input_description = st.text_area(
 # Search button
 search_button = st.button('Step 4: Search for similarity between course above and CSI courses')
 
-# Reset button (formerly Clear Inputs)
-reset_button = st.button('Reset')
+# # Reset button (formerly Clear Inputs)
+# reset_button = st.button('Reset')
 
-# Handle reset button
+# If the Reset button is pressed, initialize values to empty or defaults.
 if reset_button:
-    user_input_title = ''
+    # Input fields
+    st.session_state.user_input_title = ''
     user_input_description = ''
-    st.session_state.input_title = ''
-    st.session_state.input_description = ''
+    user_input_code = ''
+
+    # Checkboxes and select boxes
+    selected_colleges = []
+    for college_code, college_name in college_names.items():
+        default_value = True if college_name == "College of Staten Island" else False
+        if st.sidebar.checkbox(college_name, value=default_value, key=college_code):
+            selected_colleges.append(college_name)
+
+    # Session state
+    if 'input_title' in st.session_state:
+        del st.session_state['input_title']
+    if 'input_description' in st.session_state:
+        del st.session_state['input_description']
+
+    # Rerun the app to refresh the page.
     st.experimental_rerun()
 
-# Update session state values for inputs
-st.session_state.input_title = user_input_title
-st.session_state.input_description = user_input_description
+# # Update session state values for inputs
+# st.session_state.input_title = user_input_title
+# st.session_state.input_description = user_input_description
 
 for selected_college in selected_colleges:
     # Convert back from college name to file name when reading the CSV
@@ -274,7 +322,6 @@ for selected_college in selected_colleges:
 
     # Load the selected CSV from the 'cuny colleges' directory
     df_updated = pd.read_csv('csi_courses_f23.csv')
-
 
     df_updated['description'].fillna("", inplace=True)
 
@@ -289,7 +336,9 @@ for selected_college in selected_colleges:
             search_input_title = user_input_title
 
         # Now use search_input_title for similarity scores
-        closest_titles, closest_descriptions = find_closest_courses_with_scores_updated(search_input_title, user_input_description, df_updated)
+        closest_titles, closest_descriptions = find_closest_courses_with_scores_updated(search_input_title,
+                                                                                        user_input_description,
+                                                                                        df_updated)
 
         # Filter closest_titles and closest_descriptions to only include "Similar" and "Very Similar" results
         closest_titles = [title for title in closest_titles if title[2] in ["Similar", "Very Similar"]]
@@ -329,6 +378,11 @@ for selected_college in selected_colleges:
                 title_table += f"| {styled_title} | {display_college_name} | {df_updated['CODE'].iloc[title[0]]} | {title[2]} | {get_catalog_link(df_updated['url'].iloc[title[0]])} | {df_updated['t_rex'].iloc[title[0]]} |\n"
             st.markdown(title_table, unsafe_allow_html=True)
 
+        # Only store the session state if the Reset button is not pressed
+        if not reset_button:
+            st.session_state.input_title = user_input_title
+            st.session_state.input_description = user_input_description
+
         # Adding a space
         st.write("")
 
@@ -336,4 +390,5 @@ for selected_college in selected_colleges:
         st.markdown("---")
         # Adding a horizontal line
         st.markdown("---")
+
 
