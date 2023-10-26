@@ -328,7 +328,7 @@ for selected_college in selected_colleges:
     if search_button:
         # Instead, we adjust it to:
         if search_field == 'code':
-            search_input_title = corresponding_title
+            search_input_title = matched_title
         elif search_field == 'title':
             # This is already set in the previous block, so we don't need to change it
             pass
