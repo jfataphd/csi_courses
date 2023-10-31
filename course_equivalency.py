@@ -290,27 +290,27 @@ search_button = st.button('Step 4: Search for similarity between course above an
 # reset_button = st.button('Reset')
 
 # If the Reset button is pressed, initialize values to empty or defaults.
-if reset_button:
-    # Input fields
-    st.session_state.user_input_title = ''
-    user_input_description = ''
-    user_input_code = ''
+# if reset_button:
+#     # Input fields
+#     st.session_state.user_input_title = ''
+#     user_input_description = ''
+#     user_input_code = ''
 
-    # Checkboxes and select boxes
-    selected_colleges = []
-    for college_code, college_name in college_names.items():
-        default_value = True if college_name == "College of Staten Island" else False
-        if st.sidebar.checkbox(college_name, value=default_value, key=college_code):
-            selected_colleges.append(college_name)
+#     # Checkboxes and select boxes
+#     selected_colleges = []
+#     for college_code, college_name in college_names.items():
+#         default_value = True if college_name == "College of Staten Island" else False
+#         if st.sidebar.checkbox(college_name, value=default_value, key=college_code):
+#             selected_colleges.append(college_name)
 
-    # Session state
-    if 'input_title' in st.session_state:
-        del st.session_state['input_title']
-    if 'input_description' in st.session_state:
-        del st.session_state['input_description']
+#     # Session state
+#     if 'input_title' in st.session_state:
+#         del st.session_state['input_title']
+#     if 'input_description' in st.session_state:
+#         del st.session_state['input_description']
 
-    # Rerun the app to refresh the page.
-    st.rerun()
+#     # Rerun the app to refresh the page.
+#     st.rerun()
 
 # # Update session state values for inputs
 # st.session_state.input_title = user_input_title
