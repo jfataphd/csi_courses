@@ -169,7 +169,7 @@ if reset_button:
         del st.session_state['input_description']
 
     # Rerun the app to refresh the page immediately.
-    st.experimental_rerun()
+    st.rerun()
 
 input_choice = st.radio("Step 2: Select input method:",
                             ["SUNY Course Title", "SUNY Course Code", "Any Course Title/Description"])
@@ -310,7 +310,7 @@ if reset_button:
         del st.session_state['input_description']
 
     # Rerun the app to refresh the page.
-    st.experimental_rerun()
+    st.rerun()
 
 # # Update session state values for inputs
 # st.session_state.input_title = user_input_title
