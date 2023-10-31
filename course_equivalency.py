@@ -379,9 +379,9 @@ for selected_college in selected_colleges:
             st.markdown(title_table, unsafe_allow_html=True)
 
         # Only store the session state if the Reset button is not pressed
-        if not reset_button:
-            st.session_state.input_title = user_input_title
-            st.session_state.input_description = user_input_description
+        # if not reset_button:
+        st.session_state.input_title = user_input_title
+        st.session_state.input_description = user_input_description
 
         # Adding a space
         st.write("")
