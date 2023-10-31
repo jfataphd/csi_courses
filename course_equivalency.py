@@ -145,7 +145,7 @@ course_data = fetch_course_data_from_cuny01()
 description_label = 'Course Description:'
 
 # Define the Reset button immediately
-reset_button = st.button('Reset')
+# reset_button = st.button('Reset')
 
 
 # If the Reset button is pressed, initialize values to empty or defaults.
