@@ -305,7 +305,7 @@ for selected_college in selected_colleges:
     selected_file = [key for key, value in college_names.items() if value == selected_college][0] + ".csv"
 
     # Load the selected CSV from the 'cuny colleges' directory
-    df_updated = pd.read_csv(os.path.join('cuny colleges_original', selected_file))
+    df_updated = pd.read_csv(os.path.join('csi_courses_f23.csv'))
     df_updated['description'].fillna("", inplace=True)
 
     if search_button:
