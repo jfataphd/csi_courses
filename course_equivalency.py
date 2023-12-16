@@ -57,55 +57,68 @@ def fetch_course_data_from_cuny01():
     return course_data
 
 @st.cache_data
-def find_closest_courses_with_scores_updated(title, description, df, max_features_title=1000, max_features_description=5000):
-    # Determine if "College of Staten Island" is selected
-    all_cuny_selected = "College of Staten Island" in selected_college
+def find_closest_courses_with_scores_updated(title, description, df, selected_college):
+    # Determine if "All CUNY Colleges" is selected
+    all_cuny_selected = "All CUNY Colleges" in selected_college
+
     # Process for title
     if 'title' not in df.columns:
         raise ValueError("'title' column not found in the CSV.")
-
     max_features_title = 2000 if all_cuny_selected else 1000
 
     # Custom stop words list
     custom_stop_words = list(ENGLISH_STOP_WORDS) + ['independent', 'honors', 'introductory', 'advanced', 'study', 'introduction', 'elementary',
-                         'fundamental', 'seminar', 'I', 'II', 'intermediate', 'special', 'topics', 'i', 'ii', 'studies',
-                         'research', 'modern', 'internship', 'service', 'studies', 'workshop', 'directed', 'senior', 'seminars',
-                         'comparative', 'co-requisite', 'prerequisite', 'requisite', 'mth123', 'mth125', 'general', 'hours', 'credits']
+                     'fundamental', 'seminar', 'I', 'II', 'intermediate', 'special', 'topics', 'i', 'ii', 'studies',
+                     'research', 'modern', 'internship', 'service', 'studies', 'workshop', 'directed', 'senior',
+                     'seminars', 'comparative', 'studies', 'description', 'topic', 'topics', 'registrar',
+                     'adv', 'catalog', 'see', 'for', 'study', 'intro', 'basic',
+                     'registrars', 'advanced', 'principles', 'department', 'course', 'students', 'techniques', 'coop',
+                     'faculty', 'member', 'project', 'credits', 'identified', 'instructors', 'announced', 'semester',
+                     'repeated', 'eva', 'zora', 'dryden', 'creditsacquisition', 'pilot', 'topical', 'immediate', 'qulaifies',
+                     'option', 'different', 'provided', 'id', 'qc', 'sp', '3008', '3456', '3610', '17', '11', '114', 'qualifies',
+                     'accompanieducation', 'student', 'students', 'theory', 'analysis', 'work', 'lecture', 'college', 'skills',
+                     'field', 'lit', 'program', 'required', 'approved', 'soc', 'sem', 'covered', 'determined', 'offering',
+                     '&', 'continuing', '(in', '2', '1', 'vt:', 'iii', 'topics:', 'capstone', 'fieldwork', 'internship:',
+                     'practicum', 'stdy', 'tech', 'stdies', 'internship', 'englishL)', 'v', 'ital', 'internsh', 'arts,',
+                     'iv', 'fundamentals', 'indiv-instr', 'dsg', 'meth', 'psy', 'gen', 'la', 'sem:', 'melville', 'literature:',
+                     'lab', 'laboratory', 'select', 'sel', 'amer', 'major', 'subject', 'new', 'hist', 'sci', 'learn', 'msp',
+                     'credit', 'tutorial', 'individual', 'description', 'hunter', 'including', 'methods', 'mod', 'permission',
+                     'description.', 'literature', 'hours', 'study:', 'various', 'use', 'various', 'maximum', 'issues', 'include',
+                     'mat', 'using', 'report', 'majors', 'minors', 'hour', 'art.', 'music.', 'used', 'number', 'art,',
+                     'self', 'history.', 'point', 'design,', 'prerequisite:', 'art:', 'technology,', 'writing,', 'bio', 'enlish',]
 
     tfidf_vectorizer_title = TfidfVectorizer(stop_words=custom_stop_words, max_features=max_features_title)
-    tfidf_matrix_title = tfidf_vectorizer_title.fit_transform(df['title'])  # Changed df_updated to df
+    tfidf_matrix_title = tfidf_vectorizer_title.fit_transform(df['title'])
     title_vectorized = tfidf_vectorizer_title.transform([title])
     cosine_similarities_title = linear_kernel(title_vectorized, tfidf_matrix_title).flatten()
-    top_title_indices = cosine_similarities_title.argsort()[-11:][::-1] if all_cuny_selected else cosine_similarities_title.argsort()[-4:][::-1]
-    # closest_titles = [
-    #     (df['CODE'].iloc[i], cosine_similarities_title[i], categorize_similarity(cosine_similarities_title[i]))
-    #     for i in top_title_indices]
+    top_20_title_indices = cosine_similarities_title.argsort()[-20:][::-1]
 
     # Process for description
-    if 'description' not in df.columns:  # Changed df_updated to df
+    if 'description' not in df.columns:
         raise ValueError("'description' column not found in the CSV.")
-
-    max_features_description = 10000 if all_cuny_selected else 5000  # Adjust max_features based on selection
+    max_features_description = 10000 if all_cuny_selected else 5000
 
     tfidf_vectorizer_description = TfidfVectorizer(stop_words=custom_stop_words, max_features=max_features_description)
-    tfidf_matrix_description = tfidf_vectorizer_description.fit_transform(df['description'])  # Changed df_updated to df
+    tfidf_matrix_description = tfidf_vectorizer_description.fit_transform(df['description'])
     description_vectorized = tfidf_vectorizer_description.transform([description])
     cosine_similarities_description = linear_kernel(description_vectorized, tfidf_matrix_description).flatten()
-    top_description_indices = cosine_similarities_description.argsort()[-11:][::-1] if all_cuny_selected else cosine_similarities_description.argsort()[-4:][::-1]
-    # closest_descriptions = [(df['CODE'].iloc[i], cosine_similarities_description[i],
-    #                          categorize_similarity(cosine_similarities_description[i]))
-    #                         for i in top_description_indices]
 
-    # Return the indices for the top 3 courses along with scores and categories for title
-    closest_titles = [(i, cosine_similarities_title[i], categorize_similarity(cosine_similarities_title[i]))
-                      for i in top_title_indices]
+    # Calculating combined scores
+    combined_scores = []
+    for index in top_20_title_indices:
+        title_sim_score = cosine_similarities_title[index]
+        desc_sim_score = cosine_similarities_description[index]
+        combined_score = 0.75 * title_sim_score + 0.25 * desc_sim_score
+        combined_scores.append((index, combined_score))
 
-    # Return the indices for the top 3 courses along with scores and categories for description
-    closest_descriptions = [
-        (i, cosine_similarities_description[i], categorize_similarity(cosine_similarities_description[i]))
-        for i in top_description_indices]
+    # Sorting by combined score and extracting top 20
+    combined_scores.sort(key=lambda x: x[1], reverse=True)
+    top_combined = combined_scores[:20]
 
-    return closest_titles, closest_descriptions
+    # Creating a list of tuples (index, title_similarity, description_similarity, combined_score)
+    results = [(i[0], cosine_similarities_title[i[0]], cosine_similarities_description[i[0]], i[1]) for i in
+               top_combined]
+    return results
 
 
 def format_course_code(input_code):
@@ -286,102 +299,39 @@ user_input_description = st.text_area(
 # Search button
 search_button = st.button('Step 4: Search for similarity between course above and CSI courses')
 
-# # Reset button (formerly Clear Inputs)
-# reset_button = st.button('Reset')
-
-# If the Reset button is pressed, initialize values to empty or defaults.
-# if reset_button:
-#     # Input fields
-#     st.session_state.user_input_title = ''
-#     user_input_description = ''
-#     user_input_code = ''
-
-#     # Checkboxes and select boxes
-#     selected_colleges = []
-#     for college_code, college_name in college_names.items():
-#         default_value = True if college_name == "College of Staten Island" else False
-#         if st.sidebar.checkbox(college_name, value=default_value, key=college_code):
-#             selected_colleges.append(college_name)
-
-#     # Session state
-#     if 'input_title' in st.session_state:
-#         del st.session_state['input_title']
-#     if 'input_description' in st.session_state:
-#         del st.session_state['input_description']
-
-#     # Rerun the app to refresh the page.
-#     st.rerun()
-
-# # Update session state values for inputs
-# st.session_state.input_title = user_input_title
-# st.session_state.input_description = user_input_description
 
 for selected_college in selected_colleges:
     # Convert back from college name to file name when reading the CSV
     selected_file = [key for key, value in college_names.items() if value == selected_college][0] + ".csv"
 
     # Load the selected CSV from the 'cuny colleges' directory
-    df_updated = pd.read_csv('csi_courses_f23.csv')
-
+    df_updated = pd.read_csv(os.path.join('cuny colleges_original', selected_file))
     df_updated['description'].fillna("", inplace=True)
 
     if search_button:
-        # Instead, we adjust it to:
+        # Adjust search_input_title based on search_field
         if search_field == 'code':
             search_input_title = matched_title
         elif search_field == 'title':
-            # This is already set in the previous block, so we don't need to change it
+            # Already set in the previous block
             pass
         else:
             search_input_title = user_input_title
 
-        # Now use search_input_title for similarity scores
-        closest_titles, closest_descriptions = find_closest_courses_with_scores_updated(search_input_title,
-                                                                                        user_input_description,
-                                                                                        df_updated)
+        # Using the updated function
+        closest_courses = find_closest_courses_with_scores_updated(search_input_title, user_input_description, df_updated, selected_college)
 
-        # Filter closest_titles and closest_descriptions to only include "Similar" and "Very Similar" results
-        closest_titles = [title for title in closest_titles if title[2] in ["Similar", "Very Similar"]]
-        closest_descriptions = [desc for desc in closest_descriptions if desc[2] in ["Similar", "Very Similar"]]
-
-        # For Descriptions
-        st.markdown(
-            f"Closest course matches for description at <span style='color:red; font-weight:bold;'>{selected_college}</span> are:",
-            unsafe_allow_html=True)
-
-        if not closest_descriptions:
-            st.markdown("<b>NO SIMILAR DESCRIPTIONS FOUND</b>", unsafe_allow_html=True)
-        else:
-            description_table = "| Title | College | Code | Description Similarity | College Course Catalog | T-REX |\n| --- | --- | --- | --- | --- | --- |\n"
-            for description in closest_descriptions:
-                actual_college_code = df_updated['college'].iloc[description[0]]
-                display_college_name = college_names.get(actual_college_code, actual_college_code)
-                styled_description = style_text(description[2], df_updated['title'].iloc[description[0]])
-                description_table += f"| {styled_description} | {display_college_name} | {df_updated['CODE'].iloc[description[0]]} | {description[2]} | {get_catalog_link(df_updated['url'].iloc[description[0]])} | {df_updated['t_rex'].iloc[description[0]]} |\n"
-            st.markdown(description_table, unsafe_allow_html=True)
-
-        st.write("")  # Add a space
-
-        # For Titles
-        st.markdown(
-            f"Closest course matches for title at <span style='color:red; font-weight:bold;'>{selected_college}</span> are:",
-            unsafe_allow_html=True)
-
-        if not closest_titles:
-            st.markdown("<b>NO SIMILAR TITLES FOUND</b>", unsafe_allow_html=True)
-        else:
-            title_table = "| Title | College | Code | Title Similarity | College Course Catalog | T-REX |\n| --- | --- | --- | --- | --- | --- |\n"
-            for title in closest_titles:
-                actual_college_code = df_updated['college'].iloc[title[0]]
-                display_college_name = college_names.get(actual_college_code, actual_college_code)
-                styled_title = style_text(title[2], df_updated['title'].iloc[title[0]])
-                title_table += f"| {styled_title} | {display_college_name} | {df_updated['CODE'].iloc[title[0]]} | {title[2]} | {get_catalog_link(df_updated['url'].iloc[title[0]])} | {df_updated['t_rex'].iloc[title[0]]} |\n"
-            st.markdown(title_table, unsafe_allow_html=True)
-
-        # Only store the session state if the Reset button is not pressed
-        # if not reset_button:
-        st.session_state.input_title = user_input_title
-        st.session_state.input_description = user_input_description
+        # Displaying the results
+        st.markdown(f"### Top 20 Similar Courses for {selected_college}:")
+        results_table = "| Title | College | Code | Title Similarity | Description Similarity | Combined Score | Catalog Link | T-REX |\n"
+        results_table += "| --- | --- | --- | --- | --- | --- | --- | --- |\n"
+        for course in closest_courses:
+            index = course[0]
+            title_sim = course[1]
+            desc_sim = course[2]
+            combined_score = course[3]
+            results_table += f"| {df_updated['title'].iloc[index]} | {df_updated['college'].iloc[index]} | {df_updated['CODE'].iloc[index]} | {title_sim:.2f} | {desc_sim:.2f} | {combined_score:.2f} | {get_catalog_link(df_updated['url'].iloc[index])} | {df_updated['t_rex'].iloc[index]} |\n"
+        st.markdown(results_table, unsafe_allow_html=True)
 
         # Adding a space
         st.write("")
@@ -390,5 +340,4 @@ for selected_college in selected_colleges:
         st.markdown("---")
         # Adding a horizontal line
         st.markdown("---")
-
 
